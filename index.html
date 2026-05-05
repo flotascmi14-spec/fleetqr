@@ -274,7 +274,7 @@
         const imgData = new FormData();
         imgData.append('file', fotoInput.files[0]);
         imgData.append('upload_preset', 'fleetqr');
-        const imgRes = await fetch('https://api.cloudinary.com/v1_1/da7×3vta2/image/upload', {
+        const imgRes = await fetch('https://api.cloudinary.com/v1_1/fleetqr/image/upload', {
           method: 'POST', body: imgData
         });
         const imgJson = await imgRes.json();
