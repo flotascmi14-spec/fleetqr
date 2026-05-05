@@ -217,7 +217,7 @@
 
 <div class="loading-overlay" id="loading">
   <div class="spinner"></div>
-  <div class="loading-text">Enviando reporte...</div>
+  <div class="loading-text" id="loading-text">Enviando reporte...</div>
 </div>
 
 <script>
@@ -267,20 +267,32 @@
     const payload = { vehiculo, placa, nombre, tipo, urgencia, descripcion: desc };
 
     try {
-      // Usar URLSearchParams para evitar CORS preflight
+      let fotoUrl = '';
+      const fotoInput = document.querySelector('input[type="file"]');
+      if (fotoInput && fotoInput.files[0]) {
+        document.getElementById('loading-text').textContent = 'Subiendo foto...';
+        const imgData = new FormData();
+        imgData.append('file', fotoInput.files[0]);
+        imgData.append('upload_preset', 'fleetqr');
+        const imgRes = await fetch('https://api.cloudinary.com/v1_1/da7×3vta2/image/upload', {
+          method: 'POST', body: imgData
+        });
+        const imgJson = await imgRes.json();
+        fotoUrl = imgJson.secure_url || '';
+      }
+      payload.foto = fotoUrl;
+      document.getElementById('loading-text').textContent = 'Enviando reporte...';
+
       const formData = new URLSearchParams();
       Object.keys(payload).forEach(k => formData.append(k, payload[k]));
 
       await fetch(APPS_SCRIPT_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        body: formData
+        method: 'POST', mode: 'no-cors', body: formData
       });
 
       document.getElementById('loading').classList.remove('active');
-      // Con no-cors no podemos leer la respuesta, asumimos éxito
       const ticket = 'FQ-' + Math.floor(10000 + Math.random() * 90000);
-      showSuccess(ticket, nombre, tipo, urgencia);
+      showSuccess(ticket, nombre, tipo, urgencia, fotoUrl);
     } catch(e) {
       document.getElementById('loading').classList.remove('active');
       showErr('Error de conexión. Verifica tu internet e intenta nuevamente.');
@@ -296,7 +308,7 @@
     setTimeout(() => { el.style.animation = 'shakeX 0.4s ease'; }, 10);
   }
 
-  function showSuccess(ticket, nombre, tipo, urg) {
+  function showSuccess(ticket, nombre, tipo, urg, fotoUrl) {
     document.getElementById('form-section').style.display = 'none';
     document.getElementById('ticket-number').textContent = ticket;
     const rows = [
@@ -306,9 +318,10 @@
       ['Urgencia', urg],
       ['Fecha/Hora', formatTs()],
     ];
+    const fotoHtml = fotoUrl ? `<div style="margin-top:12px;border-radius:8px;overflow:hidden;"><img src="${fotoUrl}" style="width:100%;max-height:180px;object-fit:cover;border-radius:8px;" alt="Evidencia"></div>` : '';
     document.getElementById('summary-rows').innerHTML = rows.map(r =>
       `<div class="summary-row"><span class="key">${r[0]}</span><span class="val">${r[1]}</span></div>`
-    ).join('');
+    ).join('') + fotoHtml;
     document.getElementById('success-screen').style.display = 'block';
   }
 
