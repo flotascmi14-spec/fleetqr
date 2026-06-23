@@ -283,6 +283,9 @@
       payload.foto = fotoUrl;
       document.getElementById('loading-text').textContent = 'Enviando reporte...';
 
+      payload.action = "crearReporte";
+      payload.reportadoPor = nombre;
+      payload.tipoFalla = tipo;
       const formData = new URLSearchParams();
       Object.keys(payload).forEach(k => formData.append(k, payload[k]));
 
