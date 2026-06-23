@@ -289,7 +289,7 @@
       payload.fotoUrl = fotoUrl;
 
       const formData = new URLSearchParams();
-      Object.keys(payload).forEach(k => formData.append(k, String(payload[k]).substring(0, 2000)));
+      Object.keys(payload).forEach(k => formData.append(k, String(payload[k])));
 
       await fetch(APPS_SCRIPT_URL, {
         method: 'POST',
