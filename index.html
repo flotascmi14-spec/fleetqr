@@ -286,12 +286,15 @@
       payload.action = "crearReporte";
       payload.reportadoPor = nombre;
       payload.tipoFalla = tipo;
+      payload.fotoUrl = fotoUrl;
+
+      const formData = new URLSearchParams();
+      Object.keys(payload).forEach(k => formData.append(k, String(payload[k]).substring(0, 2000)));
 
       await fetch(APPS_SCRIPT_URL, {
         method: 'POST',
         mode: 'no-cors',
-        headers: { 'Content-Type': 'text/plain' },
-        body: JSON.stringify(payload)
+        body: formData
       });
 
       document.getElementById('loading').classList.remove('active');
